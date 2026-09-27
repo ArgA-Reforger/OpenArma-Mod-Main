@@ -10,6 +10,10 @@
 
 </div>
 
+> **Nota**: Este repositorio es un **fork modificado** del proyecto original [chenhaha99/OpenArma-Mod-Main](https://github.com/chenhaha99/OpenArma-Mod-Main), mantenido por [ArgA-Reforger](https://github.com/ArgA-Reforger).
+>
+> **Note**: This repository is a **modified fork** of the original [chenhaha99/OpenArma-Mod-Main](https://github.com/chenhaha99/OpenArma-Mod-Main) project, maintained by [ArgA-Reforger](https://github.com/ArgA-Reforger).
+
 ---
 
 ## Español
