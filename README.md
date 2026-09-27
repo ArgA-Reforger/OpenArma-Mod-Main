@@ -12,87 +12,6 @@
 
 ---
 
-## English
-
-### Introduction
-
-OpenArma Mod Main is the core runtime mod for [OpenArma](https://github.com/ArgA-Reforger/OpenArma) inside Arma Reforger. It implements the AI commander's full operating loop: observe the battlefield → report the situation → receive orders → execute commands.
-
-The mod itself makes no decisions — it's an **Agent MCP (Model Context Protocol) client** that talks to the OpenArma backend over REST API, while the backend's Multi-Agent engine drives all tactical decisions.
-
-### Architecture
-
-```
-OA_Main (singleton controller)
-  ├── OA_WorldObserver     Observation: scans the battlefield, builds a JSON situation report
-  ├── OA_DecisionBridge    Communication: REST API send/receive (heartbeat polling)
-  ├── OA_CommandExecutor   Execution: turns AI orders into in-game Waypoints
-  ├── OA_EventTracker      Events: tracks combat events (engagement/casualty/contact)
-  ├── OA_HudIndicator      UI: connection status / running state / faction display
-  └── OA_Config            Config: API URL / key / decision interval
-```
-
-### Runtime flow
-
-```
-1. Login     Player enters the API Key → connection established with the backend
-2. Heartbeat Every N seconds: WorldObserver scans → builds situation JSON → sends to backend
-3. Response  Backend replies with: pending orders + latest config (start/stop, faction, interval)
-4. Execute   CommandExecutor turns JSON orders into game Waypoints (move/defend/patrol/attack)
-5. Loop      Repeat 2-4 until Logout
-```
-
-### Core features
-
-- **Multi-faction support**: dynamic N-side configuration (AI vs human / AI vs AI), each side with its own control mode
-- **Situation reports**: automatic scanning of friendly/enemy positions, composition, weapons, health, ammo, current task
-- **Command execution**: supports `move` / `defend` / `patrol` / `attack` / `regroup` and other tactical commands
-- **Combat event tracking**: engagement start/end, unit deaths, enemy contacts, and other reported events
-- **Reconnection**: exponential backoff retry, up to 10 automatic reconnection attempts
-- **HUD display**: connection status indicator (green/yellow/red/gray) + current faction configuration
-
-### Installation
-
-1. Import this mod in the Arma Reforger Workbench
-2. Add `OA_GameModeInjector` or `OA_GameModeComponent` to the scene's GameMode
-3. Make sure the OpenArma backend is running
-4. Enter the API Key in-game to connect
-
-### File overview
-
-```
-OA/
-├── Scripts/Game/OA/
-│   ├── OA_Main.c                 Singleton controller: Login → Heartbeat → Logout
-│   ├── OA_WorldObserver.c        Battlefield situation scanning & JSON build
-│   ├── OA_DecisionBridge.c       REST API communication layer
-│   ├── OA_CommandExecutor.c      AI orders → game Waypoint conversion
-│   ├── OA_EventTracker.c         Combat event tracking
-│   ├── OA_HudIndicator.c         HUD status display
-│   ├── OA_InputHandler.c         Keyboard input handling
-│   ├── OA_DataStructs.c          Data structure definitions
-│   ├── OA_Config.c               Config management
-│   ├── OA_GameModeComponent.c    GameMode component injection
-│   ├── OA_GameModeInjector.c     GameMode auto-injection
-│   └── OA_PlayerControllerInjector.c  Player controller injection
-├── UI/
-│   ├── layouts/                  HUD layout files
-│   └── Textures/                 Status indicator textures
-└── addon.gproj                   Enfusion project file
-```
-
-### License
-
-[MIT](LICENSE)
-
-### Related projects
-
-- **[OpenArma](https://github.com/ArgA-Reforger/OpenArma)** — Backend + frontend (Multi-Agent platform)
-- **[OpenArma-Mod-MapExporter](https://github.com/ArgA-Reforger/OpenArma-Mod-MapExporter)** — Workbench map data export tool
-- **[OpenArma-Mod-MapScanner](https://github.com/ArgA-Reforger/OpenArma-Mod-MapScanner)** — In-game map scanning tool
-
----
-
 ## Español
 
 ### Introducción
@@ -171,3 +90,84 @@ OA/
 - **[OpenArma](https://github.com/ArgA-Reforger/OpenArma)** — Backend + frontend (plataforma Multi-Agent)
 - **[OpenArma-Mod-MapExporter](https://github.com/ArgA-Reforger/OpenArma-Mod-MapExporter)** — Herramienta de exportación de datos de mapas desde el Workbench
 - **[OpenArma-Mod-MapScanner](https://github.com/ArgA-Reforger/OpenArma-Mod-MapScanner)** — Herramienta de escaneo de mapas dentro del juego
+
+---
+
+## English
+
+### Introduction
+
+OpenArma Mod Main is the core runtime mod for [OpenArma](https://github.com/ArgA-Reforger/OpenArma) inside Arma Reforger. It implements the AI commander's full operating loop: observe the battlefield → report the situation → receive orders → execute commands.
+
+The mod itself makes no decisions — it's an **Agent MCP (Model Context Protocol) client** that talks to the OpenArma backend over REST API, while the backend's Multi-Agent engine drives all tactical decisions.
+
+### Architecture
+
+```
+OA_Main (singleton controller)
+  ├── OA_WorldObserver     Observation: scans the battlefield, builds a JSON situation report
+  ├── OA_DecisionBridge    Communication: REST API send/receive (heartbeat polling)
+  ├── OA_CommandExecutor   Execution: turns AI orders into in-game Waypoints
+  ├── OA_EventTracker      Events: tracks combat events (engagement/casualty/contact)
+  ├── OA_HudIndicator      UI: connection status / running state / faction display
+  └── OA_Config            Config: API URL / key / decision interval
+```
+
+### Runtime flow
+
+```
+1. Login     Player enters the API Key → connection established with the backend
+2. Heartbeat Every N seconds: WorldObserver scans → builds situation JSON → sends to backend
+3. Response  Backend replies with: pending orders + latest config (start/stop, faction, interval)
+4. Execute   CommandExecutor turns JSON orders into game Waypoints (move/defend/patrol/attack)
+5. Loop      Repeat 2-4 until Logout
+```
+
+### Core features
+
+- **Multi-faction support**: dynamic N-side configuration (AI vs human / AI vs AI), each side with its own control mode
+- **Situation reports**: automatic scanning of friendly/enemy positions, composition, weapons, health, ammo, current task
+- **Command execution**: supports `move` / `defend` / `patrol` / `attack` / `regroup` and other tactical commands
+- **Combat event tracking**: engagement start/end, unit deaths, enemy contacts, and other reported events
+- **Reconnection**: exponential backoff retry, up to 10 automatic reconnection attempts
+- **HUD display**: connection status indicator (green/yellow/red/gray) + current faction configuration
+
+### Installation
+
+1. Import this mod in the Arma Reforger Workbench
+2. Add `OA_GameModeInjector` or `OA_GameModeComponent` to the scene's GameMode
+3. Make sure the OpenArma backend is running
+4. Enter the API Key in-game to connect
+
+### File overview
+
+```
+OA/
+├── Scripts/Game/OA/
+│   ├── OA_Main.c                 Singleton controller: Login → Heartbeat → Logout
+│   ├── OA_WorldObserver.c        Battlefield situation scanning & JSON build
+│   ├── OA_DecisionBridge.c       REST API communication layer
+│   ├── OA_CommandExecutor.c      AI orders → game Waypoint conversion
+│   ├── OA_EventTracker.c         Combat event tracking
+│   ├── OA_HudIndicator.c         HUD status display
+│   ├── OA_InputHandler.c         Keyboard input handling
+│   ├── OA_DataStructs.c          Data structure definitions
+│   ├── OA_Config.c               Config management
+│   ├── OA_GameModeComponent.c    GameMode component injection
+│   ├── OA_GameModeInjector.c     GameMode auto-injection
+│   └── OA_PlayerControllerInjector.c  Player controller injection
+├── UI/
+│   ├── layouts/                  HUD layout files
+│   └── Textures/                 Status indicator textures
+└── addon.gproj                   Enfusion project file
+```
+
+### License
+
+[MIT](LICENSE)
+
+### Related projects
+
+- **[OpenArma](https://github.com/ArgA-Reforger/OpenArma)** — Backend + frontend (Multi-Agent platform)
+- **[OpenArma-Mod-MapExporter](https://github.com/ArgA-Reforger/OpenArma-Mod-MapExporter)** — Workbench map data export tool
+- **[OpenArma-Mod-MapScanner](https://github.com/ArgA-Reforger/OpenArma-Mod-MapScanner)** — In-game map scanning tool
