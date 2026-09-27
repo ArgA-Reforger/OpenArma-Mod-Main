@@ -2,87 +2,172 @@
 
 # OpenArma Mod Main
 
-**Arma Reforger 核心 AI 指挥官模组**
+**Arma Reforger core AI commander mod**
 
-[OpenArma 主仓库](https://github.com/chenhaha99/OpenArma) | [MapExporter](https://github.com/chenhaha99/OpenArma-Mod-MapExporter) | [MapScanner](https://github.com/chenhaha99/OpenArma-Mod-MapScanner)
+[OpenArma main repo](https://github.com/ArgA-Reforger/OpenArma) | [MapExporter](https://github.com/ArgA-Reforger/OpenArma-Mod-MapExporter) | [MapScanner](https://github.com/ArgA-Reforger/OpenArma-Mod-MapScanner)
+
+🇪🇸 [Español](#español) | 🇬🇧 [English](#english)
 
 </div>
 
 ---
 
-## 简介
+## English
 
-OpenArma Mod Main 是 [OpenArma](https://github.com/chenhaha99/OpenArma) 在 Arma Reforger 中的核心运行时模组。它实现 AI 指挥官的完整运行闭环：观察战场 → 上报态势 → 接收指令 → 执行命令。
+### Introduction
 
-模组本身不做决策 — 它是一个 **Agent MCP（模型上下文协议）客户端**，通过 REST API 与 OpenArma 后端通信，由后端的 Multi-Agent 引擎驱动所有战术决策。
+OpenArma Mod Main is the core runtime mod for [OpenArma](https://github.com/ArgA-Reforger/OpenArma) inside Arma Reforger. It implements the AI commander's full operating loop: observe the battlefield → report the situation → receive orders → execute commands.
 
-## 架构
+The mod itself makes no decisions — it's an **Agent MCP (Model Context Protocol) client** that talks to the OpenArma backend over REST API, while the backend's Multi-Agent engine drives all tactical decisions.
 
-```
-OA_Main (单例控制器)
-  ├── OA_WorldObserver     观察：扫描战场态势，构建 JSON 态势报告
-  ├── OA_DecisionBridge    通信：REST API 收发（心跳轮询）
-  ├── OA_CommandExecutor   执行：将 AI 指令转化为游戏内 Waypoint
-  ├── OA_EventTracker      事件：追踪战斗事件（交战/伤亡/目标发现）
-  ├── OA_HudIndicator      UI：连接状态/运行状态/阵营显示
-  └── OA_Config            配置：API 地址/密钥/决策间隔
-```
-
-## 运行流程
+### Architecture
 
 ```
-1. Login     玩家输入 API Key → 与后端建立连接
-2. Heartbeat 每 N 秒：WorldObserver 扫描 → 构建态势 JSON → 发送到后端
-3. Response  后端返回：待执行指令 + 最新配置（启停/阵营/间隔）
-4. Execute   CommandExecutor 将 JSON 指令转为游戏 Waypoint（移动/防守/巡逻/攻击）
-5. Loop      重复 2-4，直到 Logout
+OA_Main (singleton controller)
+  ├── OA_WorldObserver     Observation: scans the battlefield, builds a JSON situation report
+  ├── OA_DecisionBridge    Communication: REST API send/receive (heartbeat polling)
+  ├── OA_CommandExecutor   Execution: turns AI orders into in-game Waypoints
+  ├── OA_EventTracker      Events: tracks combat events (engagement/casualty/contact)
+  ├── OA_HudIndicator      UI: connection status / running state / faction display
+  └── OA_Config            Config: API URL / key / decision interval
 ```
 
-## 核心功能
+### Runtime flow
 
-- **多阵营支持**：动态 N 方配置（AI vs 人类 / AI vs AI），每方独立的控制模式
-- **态势报告**：自动扫描友军/敌军位置、编制、武器、健康、弹药、当前任务
-- **指令执行**：支持 `move` / `defend` / `patrol` / `attack` / `regroup` 等战术命令
-- **战斗事件追踪**：交战开始/结束、单位阵亡、敌军发现等事件上报
-- **断线重连**：指数退避重试机制，最多 10 次自动重连
-- **HUD 显示**：连接状态指示灯（绿/黄/红/灰）+ 当前阵营配置
+```
+1. Login     Player enters the API Key → connection established with the backend
+2. Heartbeat Every N seconds: WorldObserver scans → builds situation JSON → sends to backend
+3. Response  Backend replies with: pending orders + latest config (start/stop, faction, interval)
+4. Execute   CommandExecutor turns JSON orders into game Waypoints (move/defend/patrol/attack)
+5. Loop      Repeat 2-4 until Logout
+```
 
-## 安装
+### Core features
 
-1. 在 Arma Reforger Workbench 中导入本模组
-2. 将 `OA_GameModeInjector` 或 `OA_GameModeComponent` 添加到场景 GameMode
-3. 确保 OpenArma 后端已运行
-4. 游戏内输入 API Key 连接
+- **Multi-faction support**: dynamic N-side configuration (AI vs human / AI vs AI), each side with its own control mode
+- **Situation reports**: automatic scanning of friendly/enemy positions, composition, weapons, health, ammo, current task
+- **Command execution**: supports `move` / `defend` / `patrol` / `attack` / `regroup` and other tactical commands
+- **Combat event tracking**: engagement start/end, unit deaths, enemy contacts, and other reported events
+- **Reconnection**: exponential backoff retry, up to 10 automatic reconnection attempts
+- **HUD display**: connection status indicator (green/yellow/red/gray) + current faction configuration
 
-## 文件说明
+### Installation
+
+1. Import this mod in the Arma Reforger Workbench
+2. Add `OA_GameModeInjector` or `OA_GameModeComponent` to the scene's GameMode
+3. Make sure the OpenArma backend is running
+4. Enter the API Key in-game to connect
+
+### File overview
 
 ```
 OA/
 ├── Scripts/Game/OA/
-│   ├── OA_Main.c                 单例控制器：Login → Heartbeat → Logout
-│   ├── OA_WorldObserver.c        战场态势扫描 & JSON 构建
-│   ├── OA_DecisionBridge.c       REST API 通信层
-│   ├── OA_CommandExecutor.c      AI 指令 → 游戏 Waypoint 转化
-│   ├── OA_EventTracker.c         战斗事件追踪
-│   ├── OA_HudIndicator.c         HUD 状态显示
-│   ├── OA_InputHandler.c         键盘输入处理
-│   ├── OA_DataStructs.c          数据结构定义
-│   ├── OA_Config.c               配置管理
-│   ├── OA_GameModeComponent.c    GameMode 组件注入
-│   ├── OA_GameModeInjector.c     GameMode 自动注入
-│   └── OA_PlayerControllerInjector.c  玩家控制器注入
+│   ├── OA_Main.c                 Singleton controller: Login → Heartbeat → Logout
+│   ├── OA_WorldObserver.c        Battlefield situation scanning & JSON build
+│   ├── OA_DecisionBridge.c       REST API communication layer
+│   ├── OA_CommandExecutor.c      AI orders → game Waypoint conversion
+│   ├── OA_EventTracker.c         Combat event tracking
+│   ├── OA_HudIndicator.c         HUD status display
+│   ├── OA_InputHandler.c         Keyboard input handling
+│   ├── OA_DataStructs.c          Data structure definitions
+│   ├── OA_Config.c               Config management
+│   ├── OA_GameModeComponent.c    GameMode component injection
+│   ├── OA_GameModeInjector.c     GameMode auto-injection
+│   └── OA_PlayerControllerInjector.c  Player controller injection
 ├── UI/
-│   ├── layouts/                  HUD 布局文件
-│   └── Textures/                 状态指示灯贴图
-└── addon.gproj                   Enfusion 项目文件
+│   ├── layouts/                  HUD layout files
+│   └── Textures/                 Status indicator textures
+└── addon.gproj                   Enfusion project file
 ```
 
-## 许可证
+### License
 
 [MIT](LICENSE)
 
-## 关联项目
+### Related projects
 
-- **[OpenArma](https://github.com/chenhaha99/OpenArma)** — 后端 + 前端（Multi-Agent 平台）
-- **[OpenArma-Mod-MapExporter](https://github.com/chenhaha99/OpenArma-Mod-MapExporter)** — Workbench 地图数据导出工具
-- **[OpenArma-Mod-MapScanner](https://github.com/chenhaha99/OpenArma-Mod-MapScanner)** — 游戏内地图扫描工具
+- **[OpenArma](https://github.com/ArgA-Reforger/OpenArma)** — Backend + frontend (Multi-Agent platform)
+- **[OpenArma-Mod-MapExporter](https://github.com/ArgA-Reforger/OpenArma-Mod-MapExporter)** — Workbench map data export tool
+- **[OpenArma-Mod-MapScanner](https://github.com/ArgA-Reforger/OpenArma-Mod-MapScanner)** — In-game map scanning tool
+
+---
+
+## Español
+
+### Introducción
+
+OpenArma Mod Main es el mod de runtime principal de [OpenArma](https://github.com/ArgA-Reforger/OpenArma) dentro de Arma Reforger. Implementa el ciclo operativo completo del comandante IA: observar el campo de batalla → reportar la situación → recibir órdenes → ejecutar comandos.
+
+El mod en sí no toma decisiones — es un **cliente Agent MCP (Model Context Protocol)** que se comunica con el backend de OpenArma vía REST API, mientras que el motor Multi-Agent del backend maneja todas las decisiones tácticas.
+
+### Arquitectura
+
+```
+OA_Main (controlador singleton)
+  ├── OA_WorldObserver     Observación: escanea el campo de batalla, arma el reporte de situación en JSON
+  ├── OA_DecisionBridge    Comunicación: envío/recepción vía REST API (polling por heartbeat)
+  ├── OA_CommandExecutor   Ejecución: convierte las órdenes de la IA en Waypoints del juego
+  ├── OA_EventTracker      Eventos: rastrea eventos de combate (contacto/baja/avistamiento)
+  ├── OA_HudIndicator      UI: estado de conexión/estado de ejecución/facción
+  └── OA_Config            Configuración: URL de la API/clave/intervalo de decisión
+```
+
+### Flujo de ejecución
+
+```
+1. Login     El jugador ingresa la API Key → se establece la conexión con el backend
+2. Heartbeat Cada N segundos: WorldObserver escanea → arma el JSON de situación → lo envía al backend
+3. Response  El backend responde con: órdenes pendientes + configuración actualizada (inicio/parada, facción, intervalo)
+4. Execute   CommandExecutor convierte las órdenes JSON en Waypoints del juego (mover/defender/patrullar/atacar)
+5. Loop      Se repiten los pasos 2-4 hasta el Logout
+```
+
+### Funciones principales
+
+- **Soporte multi-facción**: configuración dinámica de N bandos (IA vs humano / IA vs IA), cada bando con su propio modo de control
+- **Reportes de situación**: escaneo automático de posiciones amigas/enemigas, composición, armas, salud, munición y tarea actual
+- **Ejecución de comandos**: soporta comandos tácticos como `move` / `defend` / `patrol` / `attack` / `regroup`
+- **Rastreo de eventos de combate**: inicio/fin de contacto, bajas de unidades, avistamientos enemigos y otros eventos reportados
+- **Reconexión**: reintento con backoff exponencial, hasta 10 intentos automáticos de reconexión
+- **Visualización HUD**: indicador de estado de conexión (verde/amarillo/rojo/gris) + configuración de facción actual
+
+### Instalación
+
+1. Importar este mod en el Arma Reforger Workbench
+2. Agregar `OA_GameModeInjector` o `OA_GameModeComponent` al GameMode de la escena
+3. Asegurarse de que el backend de OpenArma esté corriendo
+4. Ingresar la API Key en el juego para conectarse
+
+### Descripción de archivos
+
+```
+OA/
+├── Scripts/Game/OA/
+│   ├── OA_Main.c                 Controlador singleton: Login → Heartbeat → Logout
+│   ├── OA_WorldObserver.c        Escaneo de situación del campo de batalla y construcción del JSON
+│   ├── OA_DecisionBridge.c       Capa de comunicación REST API
+│   ├── OA_CommandExecutor.c      Conversión de órdenes de la IA en Waypoints del juego
+│   ├── OA_EventTracker.c         Rastreo de eventos de combate
+│   ├── OA_HudIndicator.c         Visualización del estado en el HUD
+│   ├── OA_InputHandler.c         Manejo de entrada de teclado
+│   ├── OA_DataStructs.c          Definiciones de estructuras de datos
+│   ├── OA_Config.c               Gestión de configuración
+│   ├── OA_GameModeComponent.c    Inyección de componente en el GameMode
+│   ├── OA_GameModeInjector.c     Inyección automática en el GameMode
+│   └── OA_PlayerControllerInjector.c  Inyección en el controlador del jugador
+├── UI/
+│   ├── layouts/                  Archivos de layout del HUD
+│   └── Textures/                 Texturas del indicador de estado
+└── addon.gproj                   Archivo de proyecto Enfusion
+```
+
+### Licencia
+
+[MIT](LICENSE)
+
+### Proyectos relacionados
+
+- **[OpenArma](https://github.com/ArgA-Reforger/OpenArma)** — Backend + frontend (plataforma Multi-Agent)
+- **[OpenArma-Mod-MapExporter](https://github.com/ArgA-Reforger/OpenArma-Mod-MapExporter)** — Herramienta de exportación de datos de mapas desde el Workbench
+- **[OpenArma-Mod-MapScanner](https://github.com/ArgA-Reforger/OpenArma-Mod-MapScanner)** — Herramienta de escaneo de mapas dentro del juego
