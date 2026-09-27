@@ -196,9 +196,8 @@ class OA_ChatCommandHandler
 			return;
 		}
 
-		OA_Log.Log(string.Format("[OA] AIWorld AI limit=%1 current=%2 active=%3",
-			aiWorld.GetAILimit(), aiWorld.GetCurrentAmountOfLimitedAIs(),
-			aiWorld.GetCurrentNumOfActiveAIs()));
+		OA_Log.Log(string.Format("[OA] AIWorld AI limit=%1 active=%2",
+			aiWorld.GetLimitOfActiveAIs(), aiWorld.GetCurrentNumOfActiveAIs()));
 
 		array<AIAgent> agents = {};
 		aiWorld.GetAIAgents(agents);
